@@ -1,0 +1,11 @@
+colorama==0.4.6
+cplex==22.1.1.1
+cyipopt==1.2.0
+docplex==2.25.236
+gurobipy==10.0.2
+matplotlib==3.7.1
+numpy==1.24.3
+numpy==1.25.1
+numpy==1.21.5
+scipy==1.11.1
+sympy==1.12
