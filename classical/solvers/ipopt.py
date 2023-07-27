@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 from scipy.optimize import dual_annealing, basinhopping, minimize
+from cyipopt import minimize_ipopt
 import math
 import func
 
@@ -20,6 +21,11 @@ def main(args):
             result = basinhopping(f, x0, niter=args.maxiter)
         else:
             result = basinhopping(f, x0)
+    elif args.ipopt:
+        if args.maxiter > 0:
+            result = minimize_ipopt(f, x0, options={'maxiter':args.maxiter})
+        else:
+            result = minimize_ipopt(f, x0)
     elif args.method != 'none':
         if args.maxiter > 0:
             result = minimize(f, x0, method=args.method, options={'maxiter':args.maxiter})
@@ -47,6 +53,8 @@ if __name__ == "__main__":
     parser.add_argument('--no-rotation', dest='no_rotation', 
      help='disable the random rotation', default=False, action='store_true')
     parser.add_argument('--basinhopping', help='use basin hopping instead of dual annealing',
+     default=False, action='store_true')
+    parser.add_argument('--ipopt', help='use Ipopt instead of dual annealing',
      default=False, action='store_true')
     parser.add_argument('--scipy', dest='method', 
      help='use scipy.optimize.minimize with the specified method instead of dual annealing',
