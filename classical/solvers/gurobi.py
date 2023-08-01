@@ -118,6 +118,7 @@ def main(args):
     m.setParam("TimeLimit", args.timeout)
     if args.logfile is not None:
         m.setParam("LogFile", args.logfile)
+    m.setParam("Threads", args.threads)
 
     # variable declaration
     z = {} # gurobi var
@@ -191,5 +192,7 @@ if __name__ == "__main__":
      default=60)
     parser.add_argument('-l', '--logfile', help='specify a log file to print gurobi log',
      default=None)
+    parser.add_argument('--threads', type=int, help='set parallelism number',
+     default=1)
     args = parser.parse_args()
     main(args)
