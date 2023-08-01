@@ -12,7 +12,7 @@ import argparse
 
 F_MIN = -0.295648678894007
 Y_OPT = -0.722242350222327
-DEBUG = True
+DEBUG = False
 
 def debug_msg(msg):
     if DEBUG:
@@ -116,6 +116,8 @@ def main(args):
     m = Model()
     m.setParam("NonConvex", 2)
     m.setParam("TimeLimit", args.timeout)
+    if args.logfile is not None:
+        m.setParam("LogFile", args.logfile)
 
     # variable declaration
     z = {} # gurobi var
@@ -187,5 +189,7 @@ if __name__ == "__main__":
      help='disable the random rotation', default=False, action='store_true')
     parser.add_argument('-t', '--timeout', type=int, help='set timeout in seconds (default = 60)',
      default=60)
+    parser.add_argument('-l', '--logfile', help='specify a log file to print gurobi log',
+     default=None)
     args = parser.parse_args()
     main(args)
