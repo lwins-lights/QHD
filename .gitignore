@@ -10,6 +10,8 @@
 ### Above combination will ignore all files without extension ###
 
 # Ignore the result folder
+# Ignore the data folder
 
-classical/scripts/results/
+results/
+data/
 __pycache__/
