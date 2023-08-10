@@ -151,6 +151,9 @@ def main(args):
     m.update()
     debug_msg(m.getConstrs())
 
+    if DEBUG:
+        m.write('model.lp')
+
     m.optimize()
 
     x_res = [0] * n
