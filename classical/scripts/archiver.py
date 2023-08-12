@@ -15,9 +15,12 @@ def get_fn_params(fn):
 
 def extract_info(s):
     s_inline = s.replace('\n', ' ')
-    res = float(re.search('Solution: f\(\[.*?\]\) = ([0-9\.]*)', s_inline).group(1))
-    user_time = float(re.search('User Time: ([0-9\.]*)', s_inline).group(1))
-    sys_time = float(re.search('System Time: ([0-9\.]*)', s_inline).group(1))
+    try:
+        res = float(re.search('Solution: f\(\[.*?\]\) = ([0-9\.]*)', s_inline).group(1))
+        user_time = float(re.search('User Time: ([0-9\.]*)', s_inline).group(1))
+        sys_time = float(re.search('System Time: ([0-9\.]*)', s_inline).group(1))
+    except:
+        res = user_time = sys_time = 'Unknown'
     return {"result":res, "usertime":user_time, "systime":sys_time}
 
 def write_to_csv(dict_data, fn):
