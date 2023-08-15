@@ -103,6 +103,15 @@ def exp_to_gname(l):
         ret = ret + "x" + str(i)
     return ret
 
+# callback for early termination
+def terminator_constructor(stopat):
+    def f(model, where):
+        if where == GRB.Callback.MIP:
+            objbst = model.cbGet(GRB.Callback.MIP_OBJBST)
+            if objbst < stopat:
+                model.terminate()
+    return f
+
 def main(args):
     #init
     np.random.seed(seed=args.seed)
@@ -154,7 +163,8 @@ def main(args):
     if DEBUG:
         m.write('model.lp')
 
-    m.optimize()
+    f = terminator_constructor(args.stopat)
+    m.optimize(f)
 
     x_res = [0] * n
     p = re.compile(r'^x[0-9]+$')
@@ -167,6 +177,7 @@ def main(args):
     print('Obj: %g' %m.ObjVal)
     print('Solution: f(%s) = %.8f' % (np.array(x_res), f_eval(x_res)))
     print('Ground Truth: f(%s) = %.8f' % (np.array(opt), f_eval(opt)))
+    print('Work: %.4f' % m.work)
 
 def test():
     m = Model()
@@ -191,11 +202,13 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--dim', type=int, help='set dimension', required=True)
     parser.add_argument('--no-rotation', dest='no_rotation', 
      help='disable the random rotation', default=False, action='store_true')
-    parser.add_argument('-t', '--timeout', type=int, help='set timeout in seconds (default = 60)',
-     default=60)
+    parser.add_argument('-t', '--timeout', type=int, help='set time limit (default = 30)',
+     default=30)
     parser.add_argument('-l', '--logfile', help='specify a log file to print gurobi log',
      default=None)
     parser.add_argument('--threads', type=int, help='set parallelism number',
      default=1)
+    parser.add_argument('--stopat', type=float, 
+     help='terminate if an objective smaller than this is found (default = 0.04)', default=0.04)
     args = parser.parse_args()
     main(args)
