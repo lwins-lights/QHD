@@ -10,18 +10,24 @@ def plot_tts(specified_iter=None):
         reader = csv.DictReader(csvfile)
         for row in reader:
             key = (row['prefix'], int(row['dim']), int(row['maxiter']))
+            if row['result'] == 'Unknown':
+                continue
             res = float(row['result'])
             if res < LOCAL_MIN / 2:
                 hit = 1
             else:
                 hit = 0
+            if args.useiter:
+                time_used = int(row['maxiter'])
+            else:
+                time_used = float(row['usertime'])
             if key in data:
                 cnt, tot_hit, tot_utime = data[key]
-                data[key] = (cnt + 1, tot_hit + hit, tot_utime + float(row['usertime']))
+                data[key] = (cnt + 1, tot_hit + hit, tot_utime + time_used)
             else:
-                data[key] = (1, hit, float(row['usertime']))
+                data[key] = (1, hit, time_used)
     curves={}
-    for key in data:
+    for key in sorted(data.keys()):
         cnt, tot_hit, tot_utime = data[key]
         prefix, dim, maxiter = key
         #suc_prob_per_well = 1.0 - tot_res / cnt / LOCAL_MIN / dim
@@ -35,6 +41,8 @@ def plot_tts(specified_iter=None):
             else:
                 curves[(prefix, maxiter)] = [{'x':dim, 'y':hypo_tts}]
         #print("%s: %s: %g" % (key, data[key], hypo_tts))
+        if args.verbose:
+            print("[VERBOSE] %s_n%d_u%d: prob. = %d/%d" % (prefix, dim, maxiter, tot_hit, cnt))
     for key in curves:
         prefix, maxiter = key
         curves[key].sort(key=lambda e: e['x'])
@@ -90,5 +98,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output', help='set output .PNG file name', required=True)
     parser.add_argument('-i', '--input', help='set input .CSV file name', required=True)
+    parser.add_argument('-v', '--verbose', default=False, action='store_true')
+    parser.add_argument('--useiter', default=False, help='compute TTS using the "maxiter" field', action='store_true')
     args = parser.parse_args()
     main(args)
