@@ -17,7 +17,10 @@ def extract_info(s):
     s_inline = s.replace('\n', ' ')
     try:
         res = float(re.search('Solution: f\(\[.*?\]\) = ([0-9\.]*)', s_inline).group(1))
-        user_time = float(re.search('User Time: ([0-9\.]*)', s_inline).group(1))
+        if args.gurobi:
+            user_time = float(re.search('Work: ([0-9\.]*)', s_inline).group(1))
+        else:
+            user_time = float(re.search('User Time: ([0-9\.]*)', s_inline).group(1))
         sys_time = float(re.search('System Time: ([0-9\.]*)', s_inline).group(1))
     except:
         res = user_time = sys_time = 'Unknown'
@@ -48,5 +51,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dir', help='set working directory', required=True)
     parser.add_argument('-o', '--output', help='set output .CSV file name', required=True)
+    parser.add_argument('--gurobi', default=False, help='use "Work" field instead of "User Time"', action='store_true')
     args = parser.parse_args()
     main(args)

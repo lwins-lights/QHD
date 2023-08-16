@@ -2,7 +2,10 @@ import argparse, csv
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
+from matplotlib.ticker import MaxNLocator
+
 LOCAL_MIN = 0.0883667
+INF = 1e10
 
 def plot_tts(specified_iter=None):
     data = {}
@@ -22,27 +25,51 @@ def plot_tts(specified_iter=None):
             else:
                 time_used = float(row['usertime'])
             if key in data:
-                cnt, tot_hit, tot_utime = data[key]
-                data[key] = (cnt + 1, tot_hit + hit, tot_utime + time_used)
+                cnt, tot_hit, tot_utime, utime_list = data[key]
+                utime_list.append((time_used, hit))
+                data[key] = (cnt + 1, tot_hit + hit, tot_utime + time_used, utime_list)
             else:
-                data[key] = (1, hit, time_used)
+                data[key] = (1, hit, time_used, [(time_used, hit)])
     curves={}
     for key in sorted(data.keys()):
-        cnt, tot_hit, tot_utime = data[key]
-        prefix, dim, maxiter = key
-        #suc_prob_per_well = 1.0 - tot_res / cnt / LOCAL_MIN / dim
-        #hypo_suc_prob = suc_prob_per_well ** dim
-        #hypo_tts = tot_utime / cnt / hypo_suc_prob
-        suc_prob = float(tot_hit) / cnt
-        if suc_prob > 0:
-            hypo_tts = tot_utime / cnt / suc_prob
+        if not args.dynamic:
+            cnt, tot_hit, tot_utime, _ = data[key]
+            prefix, dim, maxiter = key
+            suc_prob = float(tot_hit) / cnt
+            if suc_prob > 0:
+                hypo_tts = tot_utime / cnt / suc_prob
+                if (prefix, maxiter) in curves:
+                    curves[(prefix, maxiter)].append({'x':dim, 'y':hypo_tts})
+                else:
+                    curves[(prefix, maxiter)] = [{'x':dim, 'y':hypo_tts}]
+            if args.verbose:
+                print("[VERBOSE] %s_n%d_u%d: prob. = %d/%d" % (prefix, dim, maxiter, tot_hit, cnt))
+        else:
+            cnt, _, _, utime_list = data[key]
+            prefix, dim, maxiter = key
+            utime_list.sort()
+            m = len(utime_list)
+            tot_hit = tot_utime = 0
+            min_tts = INF
+            for i in range(m):
+                utime, hit = utime_list[i]
+                tot_hit += hit
+                tot_utime += utime
+                cur_suc_prob = float(tot_hit) / cnt
+                if tot_hit > 0:
+                    cur_tts = (tot_utime + utime * (cnt - i - 1)) / cnt / cur_suc_prob
+                else:
+                    cur_tts = INF
+                if cur_tts < min_tts:
+                    min_tts = cur_tts
+                    min_tts_cutoff = utime
             if (prefix, maxiter) in curves:
-                curves[(prefix, maxiter)].append({'x':dim, 'y':hypo_tts})
+                curves[(prefix, maxiter)].append({'x':dim, 'y':min_tts})
             else:
-                curves[(prefix, maxiter)] = [{'x':dim, 'y':hypo_tts}]
-        #print("%s: %s: %g" % (key, data[key], hypo_tts))
-        if args.verbose:
-            print("[VERBOSE] %s_n%d_u%d: prob. = %d/%d" % (prefix, dim, maxiter, tot_hit, cnt))
+                curves[(prefix, maxiter)] = [{'x':dim, 'y':min_tts}]
+            if args.verbose:
+                print("[VERBOSE] %s_n%d_u%d: prob. = %d/%d; cutoff = %.4f" % (prefix, dim, maxiter, tot_hit, cnt, min_tts_cutoff))
+
     for key in curves:
         prefix, maxiter = key
         curves[key].sort(key=lambda e: e['x'])
@@ -50,7 +77,8 @@ def plot_tts(specified_iter=None):
         x = [p['x'] for p in curves[key]]
         y = [p['y'] for p in curves[key]]
         if specified_iter is None or maxiter == specified_iter:
-            plt.plot(x, y, label=prefix+"_"+str(maxiter))
+            plt.scatter(x, y, label=prefix+"_"+str(maxiter))
+            plt.plot(x, y)
 
 def plot_tts_plus(specified_iter=None):
     data = {}
@@ -88,8 +116,12 @@ def main(args):
     plot_tts()
     #plot_tts_plus()
 
-    plt.legend(loc="upper left")
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.legend(loc="upper left", fontsize="7")
     plt.yscale('log')
+    plt.xlabel("Dimensionaity")
+    plt.ylabel("Time-to-Solution (sec)")
     plt.savefig(args.output)
     plt.show()
 
@@ -100,5 +132,6 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--input', help='set input .CSV file name', required=True)
     parser.add_argument('-v', '--verbose', default=False, action='store_true')
     parser.add_argument('--useiter', default=False, help='compute TTS using the "maxiter" field', action='store_true')
+    parser.add_argument('--dynamic', default=False, help='enable the dynamic TTS estimation', action='store_true')
     args = parser.parse_args()
     main(args)
