@@ -121,7 +121,7 @@ def main(args):
     plt.legend(loc="upper left", fontsize="7")
     plt.yscale('log')
     plt.xlabel("Dimensionaity")
-    plt.ylabel("Time-to-Solution (sec)")
+    plt.ylabel("Time-to-Solution (%s)" % args.yunit)
     plt.savefig(args.output)
     plt.show()
 
@@ -133,5 +133,6 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose', default=False, action='store_true')
     parser.add_argument('--useiter', default=False, help='compute TTS using the "maxiter" field', action='store_true')
     parser.add_argument('--dynamic', default=False, help='enable the dynamic TTS estimation', action='store_true')
+    parser.add_argument('--yunit', default='sec', help='set the unit for y axis (default="sec")')
     args = parser.parse_args()
     main(args)
