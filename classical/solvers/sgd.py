@@ -22,8 +22,8 @@ def sgd(f, x, lr0, niter_success, lrmax, lrqhd):
     ###########################
     # If lrqhd:
     #    t \in [1/2lr0, lr0/2]
-    #    s \in [lr0, 1/lr0]
-    #    s = 1/2t
+    #    lr \in [lr0, 1/lr0]
+    #    lr = 1/2t
     ###########################
     n = len(x)
     lr = lr0
@@ -42,7 +42,7 @@ def sgd(f, x, lr0, niter_success, lrmax, lrqhd):
             x = x - (f_grad + np.random.normal(size=n)) * lr
             lr_used = lr
         else:
-            x = x - (f_grad + np.random.normal(size=n) / math.sqrt(lrmax / lr)) * lrmax
+            x = x - (f_grad + np.random.normal(size=n) * math.sqrt(lr / lrmax)) * lrmax
             lr_used = lrmax
 
         if lrqhd:
