@@ -7,7 +7,7 @@ def get_fn_params(fn):
     x = re.search(r'([a-z0-9]*)_n([0-9]*)_s([0-9]*)_u([0-9\.]*).txt', fn)
     y = re.search(r'([a-z0-9]*)_n([0-9]*)_s([0-9]*).txt', fn)
     if x is not None:
-        return {"prefix":x.group(1), "dim":int(x.group(2)), "seed":int(x.group(3)), "maxiter":int(x.group(4))}
+        return {"prefix":x.group(1), "dim":int(x.group(2)), "seed":int(x.group(3)), "maxiter":x.group(4)}
     elif y is not None:
         return {"prefix":y.group(1), "dim":int(y.group(2)), "seed":int(y.group(3)), "maxiter":0}
     else:

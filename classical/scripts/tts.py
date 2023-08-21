@@ -12,7 +12,7 @@ def plot_tts(specified_iter=None):
     with open(args.input, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            key = (row['prefix'], int(row['dim']), int(row['maxiter']))
+            key = (row['prefix'], int(row['dim']), float(row['maxiter']), row['maxiter'])
             if row['result'] == 'Unknown':
                 continue
             res = float(row['result'])
@@ -21,7 +21,7 @@ def plot_tts(specified_iter=None):
             else:
                 hit = 0
             if args.useiter:
-                time_used = int(row['maxiter'])
+                time_used = float(row['maxiter'])
             else:
                 time_used = float(row['usertime'])
             if key in data:
@@ -34,7 +34,7 @@ def plot_tts(specified_iter=None):
     for key in sorted(data.keys()):
         if not args.dynamic:
             cnt, tot_hit, tot_utime, _ = data[key]
-            prefix, dim, maxiter = key
+            prefix, dim, _, maxiter = key
             suc_prob = float(tot_hit) / cnt
             if suc_prob > 0:
                 hypo_tts = tot_utime / cnt / suc_prob
@@ -43,10 +43,10 @@ def plot_tts(specified_iter=None):
                 else:
                     curves[(prefix, maxiter)] = [{'x':dim, 'y':hypo_tts}]
             if args.verbose:
-                print("[VERBOSE] %s_n%d_u%d: prob. = %d/%d" % (prefix, dim, maxiter, tot_hit, cnt))
+                print("[VERBOSE] %s_n%d_u%s: prob. = %d/%d" % (prefix, dim, maxiter, tot_hit, cnt))
         else:
             cnt, _, _, utime_list = data[key]
-            prefix, dim, maxiter = key
+            prefix, dim, _, maxiter = key
             utime_list.sort()
             m = len(utime_list)
             tot_hit = tot_utime = 0
@@ -68,7 +68,7 @@ def plot_tts(specified_iter=None):
             else:
                 curves[(prefix, maxiter)] = [{'x':dim, 'y':min_tts}]
             if args.verbose:
-                print("[VERBOSE] %s_n%d_u%d: prob. = %d/%d; cutoff = %.4f" % (prefix, dim, maxiter, tot_hit, cnt, min_tts_cutoff))
+                print("[VERBOSE] %s_n%d_u%s: prob. = %d/%d; cutoff = %.4f" % (prefix, dim, maxiter, tot_hit, cnt, min_tts_cutoff))
 
     for key in curves:
         prefix, maxiter = key
@@ -77,7 +77,7 @@ def plot_tts(specified_iter=None):
         x = [p['x'] for p in curves[key]]
         y = [p['y'] for p in curves[key]]
         if specified_iter is None or maxiter == specified_iter:
-            plt.scatter(x, y, label=prefix+"_"+str(maxiter))
+            plt.scatter(x, y, label=prefix+"_"+maxiter)
             plt.plot(x, y)
 
 def plot_tts_plus(specified_iter=None):
@@ -85,7 +85,7 @@ def plot_tts_plus(specified_iter=None):
     with open(args.input, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            key = (row['prefix'], int(row['dim']), int(row['maxiter']))
+            key = (row['prefix'], int(row['dim']), float(row['maxiter']))
             if key in data:
                 cnt, tot_res, tot_utime = data[key]
                 data[key] = (cnt + 1, tot_res + float(row['result']), tot_utime + float(row['usertime']))
