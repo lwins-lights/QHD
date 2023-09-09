@@ -70,6 +70,9 @@ def R(p0, p):
 def label_transform(s):
     if args.ltoff:
         return s
+    if args.rainbow:
+        x = re.search(r'([a-z0-9]*)_([0-9\.]*)', s)
+        return x.group(2)
     if s in lt_table.keys():
         return lt_table[s]
     else:
@@ -99,6 +102,8 @@ def plot_tts(specified_iter=None):
             else:
                 data[key] = (1, hit, time_used, [(time_used, hit)])
     curves={}
+    if args.rainbow:
+        cutoff_list=[]
     for key in sorted(data.keys()):
         if not args.dynamic:
             cnt, tot_hit, tot_utime, _ = data[key]
@@ -139,12 +144,42 @@ def plot_tts(specified_iter=None):
                     min_tts_ub = (tot_utime + utime * (cnt - i - 1)) / cnt * R(0.99, cur_suc_prob - ci_95_radius)
                     min_tts_lb = (tot_utime + utime * (cnt - i - 1)) / cnt * R(0.99, cur_suc_prob + ci_95_radius)
                     min_tts_cutoff = utime
-            if (prefix, maxiter) in curves:
-                curves[(prefix, maxiter)].append({'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb})
+            if not args.rainbow:
+                if (prefix, maxiter) in curves:
+                    curves[(prefix, maxiter)].append({'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb})
+                else:
+                    curves[(prefix, maxiter)] = [{'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb}]
             else:
-                curves[(prefix, maxiter)] = [{'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb}]
+                cutoff_list.append(min_tts_cutoff)
             if args.verbose:
                 print("[VERBOSE] %s_n%d_u%s: prob. = %d/%d; cutoff = %.4f" % (prefix, dim, maxiter, tot_hit, cnt, min_tts_cutoff))
+
+    if args.rainbow:
+        cutoff_list.sort()
+        for cutoff in cutoff_list:
+            maxiter = ("%.4f" % cutoff)
+            for key in sorted(data.keys()):
+                cnt, _, _, utime_list = data[key]
+                prefix, dim, _, _ = key
+                utime_list.sort()
+                m = len(utime_list)
+                tot_hit = tot_utime = 0
+                for i in range(m):
+                    utime, hit = utime_list[i]
+                    if utime <= cutoff:
+                        tot_hit += hit
+                    tot_utime += min(utime, cutoff)
+                suc_prob = float(tot_hit) / cnt
+                ci_95_radius = 1.96 * sqrt(suc_prob * (1 - suc_prob) / cnt)
+                if tot_hit >= args.robustness:
+                    hypo_tts = tot_utime / cnt * R(0.99, suc_prob)
+                    hypo_tts_ub = tot_utime / cnt * R(0.99, suc_prob - ci_95_radius)
+                    hypo_tts_lb = tot_utime / cnt * R(0.99, suc_prob + ci_95_radius)
+                    #print("[%.5lf,%.5lf]" % (hypo_tts_lb, hypo_tts_ub))
+                    if (prefix, maxiter) in curves:
+                        curves[(prefix, maxiter)].append({'x':dim, 'y':hypo_tts, 'y_ub':hypo_tts_ub, 'y_lb':hypo_tts_lb})
+                    else:
+                        curves[(prefix, maxiter)] = [{'x':dim, 'y':hypo_tts, 'y_ub':hypo_tts_ub, 'y_lb':hypo_tts_lb}]
 
     palette = color_palette("husl", len(curves))
 
@@ -215,6 +250,7 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose', default=False, action='store_true')
     parser.add_argument('--useiter', default=False, help='compute TTS using the "maxiter" field', action='store_true')
     parser.add_argument('--dynamic', default=False, help='enable the dynamic TTS estimation', action='store_true')
+    parser.add_argument('--rainbow', default=False, help='draw all curves for dynamic TTS estimation', action='store_true')
     parser.add_argument('--yunit', default='sec', help='set the unit for y axis (default="sec")')
     parser.add_argument('--robustness', type=int, default=5, help='kill data points with less than this number of success instances observed')
     parser.add_argument('--ltoff', default=False, help='disable automatic label transformation', action='store_true')

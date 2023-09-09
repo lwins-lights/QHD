@@ -1,7 +1,0 @@
-colorama
-cyipopt
-gurobipy
-matplotlib
-numpy
-scipy
-sympy
