@@ -144,12 +144,12 @@ def plot_tts(specified_iter=None):
                     min_tts_ub = (tot_utime + utime * (cnt - i - 1)) / cnt * R(0.99, cur_suc_prob - ci_95_radius)
                     min_tts_lb = (tot_utime + utime * (cnt - i - 1)) / cnt * R(0.99, cur_suc_prob + ci_95_radius)
                     min_tts_cutoff = utime
-            if not args.rainbow:
-                if (prefix, maxiter) in curves:
-                    curves[(prefix, maxiter)].append({'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb})
-                else:
-                    curves[(prefix, maxiter)] = [{'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb}]
+            #if not args.rainbow:
+            if (prefix, maxiter) in curves:
+                curves[(prefix, maxiter)].append({'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb})
             else:
+                curves[(prefix, maxiter)] = [{'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb}]
+            if args.rainbow:
                 cutoff_list.append(min_tts_cutoff)
             if args.verbose:
                 print("[VERBOSE] %s_n%d_u%s: prob. = %d/%d; cutoff = %.4f" % (prefix, dim, maxiter, tot_hit, cnt, min_tts_cutoff))
@@ -181,9 +181,14 @@ def plot_tts(specified_iter=None):
                     else:
                         curves[(prefix, maxiter)] = [{'x':dim, 'y':hypo_tts, 'y_ub':hypo_tts_ub, 'y_lb':hypo_tts_lb}]
 
-    palette = color_palette("husl", len(curves))
+    if args.rainbow:
+        palette = color_palette("husl", len(curves) - 1)
+    else:
+        palette = color_palette("husl", len(curves))
 
     for i, key in enumerate(curves):
+        if args.rainbow:
+            i -= 1
         prefix, maxiter = key
         curves[key].sort(key=lambda e: e['x'])
         #print(curves[key])
@@ -191,9 +196,12 @@ def plot_tts(specified_iter=None):
         y = [p['y'] for p in curves[key]]
         y_err = [[p['y'] - p['y_lb'] for p in curves[key]], [p['y_ub'] - p['y'] for p in curves[key]]]
         if specified_iter is None or maxiter == specified_iter:
-            plt.errorbar(x, y, yerr=y_err, color=palette[i], label=label_transform(prefix+"_"+maxiter), capsize=3)
+            if args.rainbow and maxiter == '0':
+                plt.plot(x, y, linewidth=5, color=(0,0,0,0.3), label='Minimal TTS')
+            else:
+                plt.errorbar(x, y, yerr=y_err, color=palette[i], label=label_transform(prefix+"_"+maxiter), capsize=3)
             #plt.scatter(x, y, s=100, color=palette[i])
-            plt.plot(x, y, linewidth=1, color=palette[i])
+                plt.plot(x, y, linewidth=1, color=palette[i])
 
 '''
 def plot_tts_plus(specified_iter=None):
