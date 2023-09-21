@@ -1,7 +1,19 @@
 
-# Classical Solvers against Multidimensional Double-Wells
+# A Quantum-Classical Performance Separation in Nonconvex Optimization
 
-This repository contains all necessary code for our experiments on classical solvers against multidimensional double-wells.
+## Introduction
+
+This repository contains all necessary code for our experiments on classical optimization algorithms against optimization instances of multidimensional double-wells. In our paper (preprint to appear soon), we prove that [quantum Hamiltonian descent](https://jiaqileng.github.io/quantum-hamiltonian-descent/) can solve these optimization instances with query complexity $\widetilde{\mathcal{O}}(d^3)$ and gate complexity $\widetilde{\mathcal{O}}(d^4)$, where $d$ denotes the dimensionality of an instance. Our experiment suggests that representative state-of-the-art classical optimization algorithms/solvers (including Gurobi) would require a super-polynomial time to solve such optimization instances.
+
+### Roadmap
+* `solvers/` contains source code of various algorithms/solvers. All scripts except `func.py` are executable with built-in `--help` command.
+	* `func.py` is used to generate (the oracle to) a multidimensional double-well instance.
+	* `dual_annealing.py` is the core script to test various algorithms against instances provided by `func.py`.
+	* `ipopt.py` is the core script to test [Ipopt](https://coin-or.github.io/Ipopt/index.html).
+	* `gurobi.py` is the core script to test [Gurobi](https://www.gurobi.com/). It does not rely on `func.py` since Gurobi requires an *explicit* description to the optimization objective rather than a black-box oracle access to it.
+	* `sgd.py` is the core script to test stochastic (or perturbed) gradient descent.
+* `scripts/` contains various scripts to automate the whole experiment. One does not necessarily rely on these scripts and can write own testing scripts with ease.
+
 ## Usage
 ### Prerequisites
 It is recommended to run our code on Debian-based Linux distributions.
