@@ -1,4 +1,4 @@
-import os, argparse, re, csv
+import os, argparse, re, csv, pickle
 from tqdm import tqdm
 
 INVALID = -1
@@ -33,7 +33,7 @@ def write_to_csv(dict_data, fn):
         writer.writeheader()
         for data in dict_data:
             writer.writerow(data)
-
+'''
 def main(args):
     file_list = os.listdir(args.dir)
     data = []
@@ -46,11 +46,36 @@ def main(args):
             params.update(info)
             data.append(params)
     write_to_csv(data, args.output)
+'''
+
+def main():
+    out_data = []
+    # count items
+    print("Counting... ", end='')
+    tot = 0
+    with open(args.input, 'rb') as handle:
+        try:
+            while True:
+                pickle.load(handle)
+                tot += 1
+        except EOFError:
+            pass
+    print("Complete.")
+    with open(args.input, 'rb') as handle: 
+        for i in tqdm(range(tot)):
+            fn, data = pickle.load(handle)
+            params = get_fn_params(fn)
+            if params != INVALID:
+                info = extract_info(data)
+                params.update(info)
+                out_data.append(params)
+    write_to_csv(out_data, args.output)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--dir', help='set working directory', required=True)
+    parser.add_argument('-i', '--input', help='set input pickle file name', required=True)
     parser.add_argument('-o', '--output', help='set output .CSV file name', required=True)
     parser.add_argument('--gurobi', default=False, help='use "Work" field instead of "User Time"', action='store_true')
     args = parser.parse_args()
-    main(args)
+    main()
