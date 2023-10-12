@@ -70,7 +70,7 @@ def bh(dir_this):
                         "-s",
                         str(s),
                         "--maxiter",
-                        str(u)
+                        str(u),
                         "--basinhopping"
                     ],
                     'bh_n%s_s%s_u%s.txt' % (str(n), str(s), str(u)),
