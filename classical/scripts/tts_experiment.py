@@ -19,7 +19,7 @@ def drain_queue_to(tot_procs, thr, queue, output_fn):
             exp_key, exp_return = queue.get()
             with open(output_fn, mode='ab') as handle:
                 pickle.dump((exp_key, exp_return), handle, protocol=pickle.HIGHEST_PROTOCOL)
-        time.sleep(1)
+        time.sleep(10)
     return tot_procs
 
 def sqp(dir_this):
