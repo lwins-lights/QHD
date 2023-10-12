@@ -34,7 +34,7 @@ def write_to_csv(dict_data, fn):
         for data in dict_data:
             writer.writerow(data)
 
-def main(args):
+def main():
     file_list = os.listdir(args.input)
     out_data = []
     for fn in tqdm(file_list):
