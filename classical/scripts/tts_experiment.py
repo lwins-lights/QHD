@@ -54,7 +54,7 @@ def bh(dir_this):
     q = mp.Queue()
     tot_procs = 0
     for s in tqdm(range(args.minseed, args.maxseed)):
-        for u in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]:
+        for u in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]:
             for n in range(1, args.maxdim + 1):
                 async_shell(
                     [
