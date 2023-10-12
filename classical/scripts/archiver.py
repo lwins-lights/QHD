@@ -52,7 +52,7 @@ def main():
             except EOFError:
                 pass
             if args.verbose:
-                printf("[VERBOSE] %s: %d terms collected" % (fn, tot))
+                print("[VERBOSE] %s: %d terms collected" % (fn, tot))
     write_to_csv(out_data, args.output)
 
 '''
