@@ -33,21 +33,29 @@ def write_to_csv(dict_data, fn):
         writer.writeheader()
         for data in dict_data:
             writer.writerow(data)
-'''
-def main(args):
-    file_list = os.listdir(args.dir)
-    data = []
-    for fn in tqdm(file_list):
-        params = get_fn_params(fn)
-        if params != INVALID:
-            with open(os.path.join(args.dir, fn), 'r') as fp:
-                content = fp.read()
-            info = extract_info(content)
-            params.update(info)
-            data.append(params)
-    write_to_csv(data, args.output)
-'''
 
+def main(args):
+    file_list = os.listdir(args.input)
+    out_data = []
+    for fn in tqdm(file_list):
+        with open(os.path.join(args.input, fn), 'rb') as handle:
+            tot = 0
+            try:
+                while True:
+                    fn, data = pickle.load(handle)
+                    params = get_fn_params(fn)
+                    if params != INVALID:
+                        info = extract_info(data)
+                        params.update(info)
+                        out_data.append(params)
+                    tot += 1
+            except EOFError:
+                pass
+            if args.verbose:
+                printf("[VERBOSE] %s: %d terms collected" % (fn, tot))
+    write_to_csv(out_data, args.output)
+
+'''
 def main():
     out_data = []
     # count items
@@ -70,12 +78,13 @@ def main():
                 params.update(info)
                 out_data.append(params)
     write_to_csv(out_data, args.output)
-
+'''
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input', help='set input pickle file name', required=True)
+    parser.add_argument('-i', '--input', help='set input folder name containing pickle files', required=True)
     parser.add_argument('-o', '--output', help='set output .CSV file name', required=True)
     parser.add_argument('--gurobi', default=False, help='use "Work" field instead of "User Time"', action='store_true')
+    parser.add_argument('-v', '--verbose', default=False, help='show additional information of pickle files', action='store_true')
     args = parser.parse_args()
     main()
