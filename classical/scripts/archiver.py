@@ -37,8 +37,8 @@ def write_to_csv(dict_data, fn):
 def main():
     file_list = os.listdir(args.input)
     out_data = []
-    for fn in tqdm(file_list):
-        with open(os.path.join(args.input, fn), 'rb') as handle:
+    for rfn in tqdm(file_list):
+        with open(os.path.join(args.input, rfn), 'rb') as handle:
             tot = 0
             try:
                 while True:
@@ -52,7 +52,7 @@ def main():
             except EOFError:
                 pass
             if args.verbose:
-                print("[VERBOSE] %s: %d terms collected" % (fn, tot))
+                print("[VERBOSE] %s: %d terms collected" % (rfn, tot))
     write_to_csv(out_data, args.output)
 
 '''
