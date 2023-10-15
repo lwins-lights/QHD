@@ -80,17 +80,50 @@ def bh(dir_this):
                 tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
     tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
 
+def sgd2(dir_this):
+    q = mp.Queue()
+    tot_procs = 0
+    for s in tqdm(range(args.minseed, args.maxseed)):
+        for u in [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]:
+            for n in range(1, args.maxdim + 1):
+                async_shell(
+                    [
+                        "timeout",
+                        str(args.hardtimeout),
+                        "/usr/bin/time",
+                        "-f",
+                        r"User Time: %U\nSystem Time: %S",
+                        "python",
+                        os.path.join(dir_this, "../solvers/sgd.py"),
+                        "-n",
+                        str(n),
+                        "-s",
+                        str(s),
+                        "--lr",
+                        str(u),
+                        "--lrqhd"
+                    ],
+                    'sgd2_n%s_s%s_u%s.txt' % (str(n), str(s), str(u)),
+                    q
+                )
+                tot_procs += 1
+                tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
+    tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
+
 def main():
     dir_this = os.path.dirname(os.path.realpath(__file__))
     if args.sqp:
         sqp(dir_this)
     elif args.bh:
         bh(dir_this)
+    elif args.sgd2:
+        sgd2(dir_this)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--sqp', default=False, action='store_true')
     parser.add_argument('--bh', default=False, action='store_true')
+    parser.add_argument('--sgd2', default=False, action='store_true')
     parser.add_argument('--minseed', type=int, required=True)
     parser.add_argument('--maxseed', type=int, required=True)
     parser.add_argument('--maxdim', type=int, required=True)

@@ -39,10 +39,10 @@ def sgd(f, x, lr0, niter_success, lrmax, lrqhd):
         f_grad = grad(f, x, n)
 
         if lr < lrmax:
-            x = x - (f_grad + np.random.normal(size=n)) * lr
+            x = x - (f_grad + np.random.normal(size=n) / math.sqrt(n)) * lr
             lr_used = lr
         else:
-            x = x - (f_grad + np.random.normal(size=n) * math.sqrt(lr / lrmax)) * lrmax
+            x = x - (f_grad + np.random.normal(size=n) * math.sqrt(lr / lrmax / n)) * lrmax
             lr_used = lrmax
 
         if lrqhd:
