@@ -114,7 +114,7 @@ def sgd(dir_this):
     q = mp.Queue()
     tot_procs = 0
     for s in tqdm(range(args.minseed, args.maxseed)):
-        for u in ["1", "0.5", "0.25", "0.125", "0.0625", "0.03125", "0.015625", "0.0078125", "0.00390625", "0.001953125")]:
+        for u in ["1", "0.5", "0.25", "0.125", "0.0625", "0.03125", "0.015625", "0.0078125", "0.00390625", "0.001953125"]:
             for n in range(1, args.maxdim + 1):
                 async_shell(
                     [
