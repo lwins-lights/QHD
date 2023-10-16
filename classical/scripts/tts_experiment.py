@@ -110,6 +110,35 @@ def sgd2(dir_this):
                 tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
     tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
 
+def sgd(dir_this):
+    q = mp.Queue()
+    tot_procs = 0
+    for s in tqdm(range(args.minseed, args.maxseed)):
+        for u in ["1", "0.5", "0.25", "0.125", "0.0625", "0.03125", "0.015625", "0.0078125", "0.00390625", "0.001953125")]:
+            for n in range(1, args.maxdim + 1):
+                async_shell(
+                    [
+                        "timeout",
+                        str(args.hardtimeout),
+                        "/usr/bin/time",
+                        "-f",
+                        r"User Time: %U\nSystem Time: %S",
+                        "python",
+                        os.path.join(dir_this, "../solvers/sgd.py"),
+                        "-n",
+                        str(n),
+                        "-s",
+                        str(s),
+                        "--lr",
+                        str(u)
+                    ],
+                    'sgd_n%s_s%s_u%s.txt' % (str(n), str(s), str(u)),
+                    q
+                )
+                tot_procs += 1
+                tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
+    tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
+
 def main():
     dir_this = os.path.dirname(os.path.realpath(__file__))
     if args.sqp:
@@ -118,12 +147,15 @@ def main():
         bh(dir_this)
     elif args.sgd2:
         sgd2(dir_this)
+    elif args.sgd:
+        sgd(dir_this)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--sqp', default=False, action='store_true')
     parser.add_argument('--bh', default=False, action='store_true')
     parser.add_argument('--sgd2', default=False, action='store_true')
+    parser.add_argument('--sgd', default=False, action='store_true')
     parser.add_argument('--minseed', type=int, required=True)
     parser.add_argument('--maxseed', type=int, required=True)
     parser.add_argument('--maxdim', type=int, required=True)
