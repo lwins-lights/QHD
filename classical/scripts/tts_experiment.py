@@ -2,6 +2,7 @@ import argparse, os, time
 import subprocess as sp
 import multiprocessing as mp
 import pickle
+import datetime
 from tqdm import tqdm
 
 def async_shell(command, key, queue):
@@ -144,6 +145,9 @@ def gb(dir_this):
     tot_procs = 0
     for s in tqdm(range(args.minseed, args.maxseed)):
         for n in range(1, args.maxdim + 1):
+            if args.verbose:
+                print(datetime.datetime.now(), end='  ')
+                print(r'Initiating (s=%d, n=%d)' % (s, n))
             async_shell(
                 [
                     "timeout",
@@ -194,5 +198,6 @@ if __name__ == "__main__":
     parser.add_argument('--hardtimeout', type=int, required=True)
     parser.add_argument('--timeout', type=int, default=3600)
     parser.add_argument('-o', '--output', type=str, required=True)
+    parser.add_argument('-v', '--verbose', default=False, action='store_true')
     args = parser.parse_args()
     main()
