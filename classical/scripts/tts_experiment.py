@@ -155,8 +155,8 @@ def gb(dir_this):
             if args.verbose:
                 print(datetime.datetime.now(), end='  ', flush=True)
                 print(r'Initiating (s=%d, n=%d)' % (s, n), flush=True)
-            async_shell(
-                [
+            p = mp.Process(target=async_shell, args=
+                ([
                     "timeout",
                     str(args.hardtimeout),
                     "/usr/bin/time",
@@ -172,8 +172,8 @@ def gb(dir_this):
                     str(args.timeout)
                 ],
                 'gb_n%s_s%s.txt' % (str(n), str(s)),
-                q
-            )
+                q))
+            p.start()
             tot_procs += 1
             tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
     tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
