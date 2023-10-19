@@ -21,6 +21,9 @@ def drain_queue_to(tot_procs, thr, queue, output_fn):
             with open(output_fn, mode='ab') as handle:
                 pickle.dump((exp_key, exp_return), handle, protocol=pickle.HIGHEST_PROTOCOL)
         time.sleep(10)
+        #if args.verbose:
+        #    print(datetime.datetime.now(), end='  ', flush=True)
+        #    print('Sleep(10)', flush=True)
     return tot_procs
 
 def sqp(dir_this):
@@ -143,7 +146,11 @@ def sgd(dir_this):
 def gb(dir_this):
     q = mp.Queue()
     tot_procs = 0
-    for s in tqdm(range(args.minseed, args.maxseed)):
+    if not args.verbose:
+        s_list = tqdm(range(args.minseed, args.maxseed))
+    else:
+        s_list = range(args.minseed, args.maxseed)
+    for s in s_list:
         for n in range(1, args.maxdim + 1):
             if args.verbose:
                 print(datetime.datetime.now(), end='  ', flush=True)
