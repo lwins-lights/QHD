@@ -146,8 +146,8 @@ def gb(dir_this):
     for s in tqdm(range(args.minseed, args.maxseed)):
         for n in range(1, args.maxdim + 1):
             if args.verbose:
-                print(datetime.datetime.now(), end='  ')
-                print(r'Initiating (s=%d, n=%d)' % (s, n))
+                print(datetime.datetime.now(), end='  ', flush=True)
+                print(r'Initiating (s=%d, n=%d)' % (s, n), flush=True)
             async_shell(
                 [
                     "timeout",

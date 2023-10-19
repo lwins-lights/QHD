@@ -177,7 +177,7 @@ def main(args):
     print('Obj: %g' %m.ObjVal)
     print('Solution: f(%s) = %.8f' % (np.array(x_res), f_eval(x_res)))
     print('Ground Truth: f(%s) = %.8f' % (np.array(opt), f_eval(opt)))
-    print('Work: %.4f' % m.work)
+    print('Work: %.8f' % m.work)
 
 def test():
     m = Model()
