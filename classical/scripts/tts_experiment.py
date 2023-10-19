@@ -31,8 +31,8 @@ def sqp(dir_this):
     tot_procs = 0
     for s in tqdm(range(args.minseed, args.maxseed)):
         for n in range(1, args.maxdim + 1):
-            async_shell(
-                [
+            p = mp.Process(target=async_shell, args=
+                ([
                     "timeout",
                     str(args.hardtimeout),
                     "/usr/bin/time",
@@ -48,8 +48,8 @@ def sqp(dir_this):
                     "SLSQP"
                 ],
                 'sqp_n%s_s%s.txt' % (str(n), str(s)),
-                q
-            )
+                q))
+            p.start()
             tot_procs += 1
             tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
     tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
@@ -58,10 +58,10 @@ def bh(dir_this):
     q = mp.Queue()
     tot_procs = 0
     for s in tqdm(range(args.minseed, args.maxseed)):
-        for u in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]:
+        for u in [8, 16, 32, 64, 128, 256, 512, 1024, 2048]:
             for n in range(1, args.maxdim + 1):
-                async_shell(
-                    [
+                p = mp.Process(target=async_shell, args=
+                    ([
                         "timeout",
                         str(args.hardtimeout),
                         "/usr/bin/time",
@@ -78,8 +78,8 @@ def bh(dir_this):
                         "--basinhopping"
                     ],
                     'bh_n%s_s%s_u%s.txt' % (str(n), str(s), str(u)),
-                    q
-                )
+                    q))
+                p.start()
                 tot_procs += 1
                 tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
     tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
@@ -88,10 +88,10 @@ def sgd2(dir_this):
     q = mp.Queue()
     tot_procs = 0
     for s in tqdm(range(args.minseed, args.maxseed)):
-        for u in [2, 4, 8, 16, 32, 64, 128]:
+        for u in [2, 4, 8, 16, 32, 64, 128, 256, 512]:
             for n in range(1, args.maxdim + 1):
-                async_shell(
-                    [
+                p = mp.Process(target=async_shell, args=
+                    ([
                         "timeout",
                         str(args.hardtimeout),
                         "/usr/bin/time",
@@ -108,8 +108,8 @@ def sgd2(dir_this):
                         "--lrqhd"
                     ],
                     'sgd2_n%s_s%s_u%s.txt' % (str(n), str(s), str(u)),
-                    q
-                )
+                    q))
+                p.start()
                 tot_procs += 1
                 tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
     tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
@@ -118,10 +118,10 @@ def sgd(dir_this):
     q = mp.Queue()
     tot_procs = 0
     for s in tqdm(range(args.minseed, args.maxseed)):
-        for u in ["16", "8", "4", "2", "1", "0.5", "0.25", "0.125", "0.0625"]:
+        for u in ["8", "4", "2", "1", "0.5", "0.25", "0.125", "0.0625", "0.03125"]:
             for n in range(1, args.maxdim + 1):
-                async_shell(
-                    [
+                p = mp.Process(target=async_shell, args=
+                    ([
                         "timeout",
                         str(args.hardtimeout),
                         "/usr/bin/time",
@@ -137,8 +137,8 @@ def sgd(dir_this):
                         str(u)
                     ],
                     'sgd_n%s_s%s_u%s.txt' % (str(n), str(s), str(u)),
-                    q
-                )
+                    q))
+                p.start()
                 tot_procs += 1
                 tot_procs = drain_queue_to(tot_procs, args.par - 1, q, args.output)
     tot_procs = drain_queue_to(tot_procs, 0, q, args.output)
