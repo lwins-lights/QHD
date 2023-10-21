@@ -35,7 +35,7 @@ lt_table = {
     'da_2048': '2048',
     'da_4096': '4096',
     'da_8192': '8192',
-    'da_16384': '16384'
+    'da_16384': '16384',
     'ipopt_0': 'Ipopt',
     'sqp_0': 'SQP',
     'sgd_16': '16',
@@ -152,10 +152,11 @@ def plot_tts(specified_iter=None):
                     min_tts_lb = (tot_utime + utime * (cnt - i - 1)) / cnt * R(0.99, cur_suc_prob + ci_95_radius)
                     min_tts_cutoff = utime
             #if not args.rainbow:
-            if (prefix, maxiter) in curves:
-                curves[(prefix, maxiter)].append({'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb})
-            else:
-                curves[(prefix, maxiter)] = [{'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb}]
+            if min_tts != INF:
+                if (prefix, maxiter) in curves:
+                    curves[(prefix, maxiter)].append({'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb})
+                else:
+                    curves[(prefix, maxiter)] = [{'x':dim, 'y':min_tts, 'y_ub':min_tts_ub, 'y_lb':min_tts_lb}]
             if args.rainbow:
                 cutoff_list.append(min_tts_cutoff)
             if args.verbose:
@@ -204,7 +205,7 @@ def plot_tts(specified_iter=None):
         y_err = [[p['y'] - p['y_lb'] for p in curves[key]], [p['y_ub'] - p['y'] for p in curves[key]]]
         if specified_iter is None or maxiter == specified_iter:
             if args.rainbow and maxiter == '0':
-                plt.plot(x, y, linewidth=5, color=(0,0,0,0.3), label='Minimal TTS')
+                plt.plot(x, y, linewidth=5, color=(0,0,0,0.35), label='Min TTS')
             else:
                 plt.errorbar(x, y, yerr=y_err, color=palette[i], label=label_transform(prefix+"_"+maxiter), capsize=3)
             #plt.scatter(x, y, s=100, color=palette[i])
